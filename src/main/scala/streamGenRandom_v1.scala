@@ -11,7 +11,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 import scala.util.Random
 import scala.io.Source
 
-object streamGenRandom{
+object streamGenRandom_v1{
 	val listener = new ServerSocket(9999)
 	val socket = listener.accept()
 	val out = new PrintWriter(socket.getOutputStream(), true)
@@ -23,26 +23,24 @@ object streamGenRandom{
 
 
 //		val file_name = "/home/user/Desktop/hongji/ref/review_data/Musical_Instruments_"+num+".json"
-		val file_name = "/home/user/Desktop/hongji/ref/dblp_"+num+"k.json"
+		val file_name = "/home/user/Desktop/hongji/ref/SF_"+num+"k.json"
 		val mongoData = sc.textFile(file_name)
                 mongoData.cache()
 		val dataCount = mongoData.count().toInt
-		//val indexKey = mongoData.zipWithIndex.map{ case(k,v) => (v,k)}
+		val indexKey = mongoData.zipWithIndex.map{ case(k,v) => (v,k)}
 		val randomValue = scala.util.Random
-
-		val dataArray = mongoData.collect()
 
 
 		println("Got client connected from : "+socket.getInetAddress)
 		
 		while(true){
 			val num = randomValue.nextInt(dataCount-1)+1
-			val sst = dataArray(num)
+			val sst = indexKey.lookup(num)(0)
 			out.write(sst)
 			out.write("\n")
 			out.flush()
 			//Thread.sleep(25)
-                        Thread.sleep(3)// ( 1, 999999)
+                        Thread.sleep(5)
 		}
 
 
